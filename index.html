@@ -472,12 +472,12 @@
 </div>
 
 <div class="footer">
-  Computer Engg. Department Portal (v3.1) · Dr. Punjabrao Deshmukh Polytechnic, Amravati ·
+  Computer Engg. Department Portal (v3.2) · Dr. Punjabrao Deshmukh Polytechnic, Amravati ·
   All records are maintained in the institutional Google Sheet.
 </div>
 
 <script>
-var APP_VERSION = '3.1';
+var APP_VERSION = '3.2';
 var TOKEN = localStorage.getItem('dep_token') || '';
 var DATA = { types: [], events: [], notices: [], myRegs: [], menuTabs: [], tabItems: [], user: null };
 var CURRENT_CAT = '';
@@ -997,8 +997,9 @@ function renderMenuTabAdmin(){
     if(t.visibility && t.visibility!=='All') mark += ' ['+esc(t.visibility)+']';
     if(t.link) mark += ' [direct link]';
     if(t.hidden) mark += ' [hidden]';
-    return '<span class="typechip">'+esc(t.name)+mark
-      +'<button class="btn small'+(t.hidden?' danger':'')+'" style="margin-left:6px" onclick="doToggleMenuTabHidden(\''+esc(t.id)+'\','+(t.hidden?'false':'true')+')">'+(t.hidden?'Hidden — Show':'Visible — Hide')+'</button>'
+    var chipColor = t.hidden ? 'var(--red)' : 'var(--ink)';
+    return '<span class="typechip" style="background:'+chipColor+';color:#fff;border-color:'+chipColor+'">'+esc(t.name)+mark
+      +'<button style="margin-left:6px;background:#fff;color:'+chipColor+';border:none;border-radius:3px;padding:4px 10px;font-family:\'Mukta\';font-weight:600;font-size:.8rem;cursor:pointer" onclick="doToggleMenuTabHidden(\''+esc(t.id)+'\','+(t.hidden?'false':'true')+')">'+(t.hidden?'Hidden — Show':'Visible — Hide')+'</button>'
       +'<button onclick="doDelMenuTab(\''+esc(t.id)+'\',\''+esc(t.name)+'\')">✕</button></span>';
   }).join('') || '<span class="empty">No custom menu tabs yet.</span>';
   var keepTab = $('tiTab').value;
