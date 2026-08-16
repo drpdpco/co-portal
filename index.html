@@ -472,12 +472,12 @@
 </div>
 
 <div class="footer">
-  Computer Engg. Department Portal (v3.0) · Dr. Punjabrao Deshmukh Polytechnic, Amravati ·
+  Computer Engg. Department Portal (v3.1) · Dr. Punjabrao Deshmukh Polytechnic, Amravati ·
   All records are maintained in the institutional Google Sheet.
 </div>
 
 <script>
-var APP_VERSION = '3.0';
+var APP_VERSION = '3.1';
 var TOKEN = localStorage.getItem('dep_token') || '';
 var DATA = { types: [], events: [], notices: [], myRegs: [], menuTabs: [], tabItems: [], user: null };
 var CURRENT_CAT = '';
@@ -585,10 +585,11 @@ function buildTabs(){
   var bar = $('tabBar'); var htmlStr='';
   htmlStr += '<button class="tab" data-tab="events" onclick="showTab(\'events\')">Events</button>';
   DATA.menuTabs.forEach(function(t){
+    var label = esc(t.name) + (t.hidden ? ' 🚫' : '');
     if(t.link){
-      htmlStr += '<button class="tab" data-tab="lk:'+esc(t.id)+'" data-link="'+esc(t.link)+'" onclick="window.open(this.getAttribute(\'data-link\'),\'_blank\')">'+esc(t.name)+' ↗</button>';
+      htmlStr += '<button class="tab" data-tab="lk:'+esc(t.id)+'" data-link="'+esc(t.link)+'" onclick="window.open(this.getAttribute(\'data-link\'),\'_blank\')">'+label+' ↗</button>';
     } else {
-      htmlStr += '<button class="tab" data-tab="ct:'+esc(t.id)+'" onclick="showTab(this.getAttribute(\'data-tab\'))">'+esc(t.name)+'</button>';
+      htmlStr += '<button class="tab" data-tab="ct:'+esc(t.id)+'" onclick="showTab(this.getAttribute(\'data-tab\'))">'+label+'</button>';
     }
   });
   htmlStr += '<button class="tab" data-tab="notices" onclick="showTab(\'notices\')">Notices</button>';
@@ -995,7 +996,10 @@ function renderMenuTabAdmin(){
     var mark = '';
     if(t.visibility && t.visibility!=='All') mark += ' ['+esc(t.visibility)+']';
     if(t.link) mark += ' [direct link]';
-    return '<span class="typechip">'+esc(t.name)+mark+'<button onclick="doDelMenuTab(\''+esc(t.id)+'\',\''+esc(t.name)+'\')">✕</button></span>';
+    if(t.hidden) mark += ' [hidden]';
+    return '<span class="typechip">'+esc(t.name)+mark
+      +'<button class="btn small'+(t.hidden?' danger':'')+'" style="margin-left:6px" onclick="doToggleMenuTabHidden(\''+esc(t.id)+'\','+(t.hidden?'false':'true')+')">'+(t.hidden?'Hidden — Show':'Visible — Hide')+'</button>'
+      +'<button onclick="doDelMenuTab(\''+esc(t.id)+'\',\''+esc(t.name)+'\')">✕</button></span>';
   }).join('') || '<span class="empty">No custom menu tabs yet.</span>';
   var keepTab = $('tiTab').value;
   $('tiTab').innerHTML = DATA.menuTabs.filter(function(t){ return !t.link; }).map(function(t){
@@ -1004,6 +1008,12 @@ function renderMenuTabAdmin(){
   if(keepTab) $('tiTab').value = keepTab;
   if(!$('tiLinksBox').children.length) addTiLinkBox();
   onTiTabChange();
+}
+function doToggleMenuTabHidden(id, hidden){
+  call('adminSetMenuTabHidden', [TOKEN, id, hidden], function(r){
+    setMsg('mtMsg', r.ok, r.msg);
+    if(r.ok) refreshData(function(){ renderMenuTabAdmin(); });
+  }, 'mtMsg');
 }
 function onTiTabChange(){
   var tabId = $('tiTab').value;
