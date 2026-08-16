@@ -20,7 +20,7 @@
 
 var APP_VERSION   = '3.2';
 var SESSION_HOURS = 12;
-var DEFAULT_TYPES = ['FDP', 'Technical Quiz', 'Paper Presentation', 'Seminar', Project Competition, 'Mock Employability Test'];
+var DEFAULT_TYPES = ['FDP', 'Technical Quiz', 'Paper Presentation', 'Seminar', 'Project Competition'];
 
 
 /* ------------------------------------------------------------------ */
