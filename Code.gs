@@ -18,9 +18,9 @@
  *  Default admin : admin@dpdpoly.ac.in / Admin@123  (change after login)
  ***********************************************************************/
 
-var APP_VERSION   = '3.1';
+var APP_VERSION   = '3.2';
 var SESSION_HOURS = 12;
-var DEFAULT_TYPES = ['FDP', 'Technical Quiz', 'Paper Presentation', 'Seminar', 'Group Discussion', 'Mock Employability Test','Project Competition'];
+var DEFAULT_TYPES = ['FDP', 'Technical Quiz', 'Paper Presentation', 'Seminar', Project Competition, 'Mock Employability Test'];
 
 
 /* ------------------------------------------------------------------ */
