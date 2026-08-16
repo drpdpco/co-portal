@@ -18,9 +18,9 @@
  *  Default admin : admin@dpdpoly.ac.in / Admin@123  (change after login)
  ***********************************************************************/
 
-var APP_VERSION   = '3.0';
+var APP_VERSION   = '3.1';
 var SESSION_HOURS = 12;
-var DEFAULT_TYPES = ['FDP', 'QUIZ', 'Paper Presentation', 'Seminar'];
+var DEFAULT_TYPES = ['FDP', 'Technical Quiz', 'Paper Presentation', 'Seminar', 'Group Discussion', 'Mock Employability Test','Project Competition'];
 
 
 /* ------------------------------------------------------------------ */
@@ -71,6 +71,7 @@ var API_MAP = {
   adminGetUsers: adminGetUsers,
   adminAddMenuTab: adminAddMenuTab,
   adminDeleteMenuTab: adminDeleteMenuTab,
+  adminSetMenuTabHidden: adminSetMenuTabHidden,
   adminAddTabItem: adminAddTabItem,
   adminUpdateTabItem: adminUpdateTabItem,
   adminMoveTabItem: adminMoveTabItem,
@@ -130,7 +131,7 @@ function ensureSetup_() {
     'Notices':       ['NoticeID','Title','Details','Link','PostedOn'],
     'Resources':     ['ResourceID','MenuID','Title','Details','Link','PostedOn'],
     'TopMenus':      ['MenuID','MenuName'],
-    'MenuTabs':      ['TabID','TabName','LinkURL','Visibility'],
+    'MenuTabs':      ['TabID','TabName','LinkURL','Visibility','Hidden'],
     'TabItems':      ['ItemID','TabID','Title','Details','LinksJson','PostedOn','SortOrder','Hidden'],
     'Sessions':      ['Token','Email','Name','Role','Created'],
     'Settings':      ['Key','Value']
@@ -208,6 +209,12 @@ function ensureSetup_() {
   }
   if (tish.getLastColumn() < 8 || tish.getRange(1, 8).getValue() !== 'Hidden') {
     tish.getRange(1, 8).setValue('Hidden');
+  }
+
+  // Migrate old MenuTabs rows (add Hidden column)
+  var mtsh2 = ss.getSheetByName('MenuTabs');
+  if (mtsh2.getLastColumn() < 5 || mtsh2.getRange(1, 5).getValue() !== 'Hidden') {
+    mtsh2.getRange(1, 5).setValue('Hidden');
   }
 
   // Guarantee an admin account exists
@@ -451,11 +458,13 @@ function getPortalData(token) {
     for (var m = 1; m < mt.length; m++) {
       if (!mt[m][0]) continue;
       var vis = String(mt[m][3] || 'All');
+      var mtHidden = !!mt[m][4];
       if (s.role !== 'admin') {
+        if (mtHidden) continue;
         if (vis === 'Teachers only' && s.role !== 'teacher') continue;
         if (vis === 'Students only' && s.role !== 'student') continue;
       }
-      menuTabs.push({ id: mt[m][0], name: mt[m][1], link: String(mt[m][2] || ''), visibility: vis });
+      menuTabs.push({ id: mt[m][0], name: mt[m][1], link: String(mt[m][2] || ''), visibility: vis, hidden: mtHidden });
     }
 
     var ti = sheet_('TabItems').getDataRange().getValues(), tabItems = [];
@@ -847,6 +856,20 @@ function adminDeleteMenuTab(token, tabId) {
     var mt = sheet_('MenuTabs'), md = mt.getDataRange().getValues();
     for (var j = md.length - 1; j >= 1; j--)
       if (md[j][0] === tabId) { mt.deleteRow(j + 1); return { ok: true, msg: 'Menu tab and its contents deleted.' }; }
+    return { ok: false, msg: 'Menu tab not found.' };
+  } catch (e) { return { ok: false, msg: e.message }; }
+}
+
+function adminSetMenuTabHidden(token, tabId, hidden) {
+  try {
+    requireAdmin_(token);
+    var sh = sheet_('MenuTabs'), d = sh.getDataRange().getValues();
+    for (var i = 1; i < d.length; i++) {
+      if (d[i][0] === tabId) {
+        sh.getRange(i + 1, 5).setValue(hidden ? '1' : '');
+        return { ok: true, msg: hidden ? 'Menu tab hidden from students/teachers.' : 'Menu tab is now visible again.' };
+      }
+    }
     return { ok: false, msg: 'Menu tab not found.' };
   } catch (e) { return { ok: false, msg: e.message }; }
 }
